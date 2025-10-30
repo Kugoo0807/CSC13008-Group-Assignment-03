@@ -63,3 +63,7 @@ test-results/
 .vercel/
 .netlify/
 .firebase/
+
+# ========= Report =========
+*.docx
+*.pdf
