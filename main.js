@@ -39,17 +39,9 @@ function addTask(title, deadline) {
   saveArray(STORAGE_ACTIVE, activeTasks);
   render();
 }
-/* 
-****
-- Xây dựng 4 hàm:
-Active:
-+ toggleDone: Nhấn để Mark/Unmark - tác động vô biến done ở trên.
-+ softDelete: Đưa task từ active vào trash.
-Trash:
-+ hardDelete: Xóa vĩnh viễn task.
-+ restoreTask: Đưa task từ trash vào active.
-****
-*/
+
+// ====== ACTION ======
+
 function toggleDone(taskId) {
   const task = activeTasks.find(t => t.id === taskId);
   if (task) {
@@ -101,12 +93,26 @@ function formatDeadline(dlStr) {
   return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
 }
 
-// **** Build single <li> cho 2 route trash và active ****
+// ====== RENDER ACTIVE ======
+
 function renderActive() {
+
 }
+
+// ====== RENDER TRASH ======
+
+function renderTrash() {
+
+}
+
+// ====== RENDER (ROUTER & FORM SUBMIT) ======
+
 function render() {
-    renderActive();
+  const route = location.hash || "#/active";
+  if (route === "#/trash") renderTrash();
+  else renderActive();
 }
+
 formEl.addEventListener("submit", e => {
   e.preventDefault(); // chặn reload form
   const title = inputTitle.value.trim();
@@ -119,5 +125,11 @@ formEl.addEventListener("submit", e => {
   inputTitle.value = "";
   inputDeadline.value = "";
 });
+
 // ====== INITIAL RENDER ======
-render();
+
+window.addEventListener("hashchange", render);
+window.addEventListener("DOMContentLoaded", () => {
+  if (!location.hash) location.hash = "#/active";
+  render();
+});
