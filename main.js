@@ -103,53 +103,6 @@ function formatDeadline(dlStr) {
 
 // **** Build single <li> cho 2 route trash và active ****
 function renderActive() {
-  listTitleEl.textContent = "Active Tasks";
-  addFormSection.style.display = "block";
-  taskListEl.innerHTML = "";
-  if (activeTasks.length === 0) {
-    emptyStateEl.style.display = "block";
-    return;
-  } else {
-    emptyStateEl.style.display = "none";
-  }
-
-  activeTasks.forEach(task => {
-    const li = document.createElement("li");
-    li.dataset.id = task.id;
-
-    // kiểm tra quá hạn
-    const now = Date.now();
-    const isOverdue = task.deadline && !task.done && new Date(task.deadline).getTime() < now;
-
-    li.innerHTML = `
-      <div class="flex justify-between items-center p-3 rounded shadow 
-        ${task.done ? "text-gray-400 bg-white" : isOverdue ? "bg-red-600 text-white" : "bg-white text-black"}">
-        <div class="flex flex-col ${task.done ? 'line-through' : ''}">
-          <span class="task-title block">${task.title}</span>
-          <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
-        </div>
-        <div class="flex gap-2 items-center">
-          <button class="btn-toggle text-xl">${task.done ? "☑️" : "☐" }</button>
-          <button class="btn-delete text-xl">🗑️</button>
-        </div>
-      </div>
-    `;
-    taskListEl.appendChild(li);
-  });
-
-  // attach event listeners to buttons
-  taskListEl.querySelectorAll(".btn-toggle").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const id = e.target.closest("li").dataset.id;
-      toggleDone(id);
-    });
-  });
-  taskListEl.querySelectorAll(".btn-delete").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const id = e.target.closest("li").dataset.id;
-      softDelete(id);
-    });
-  });
 }
 function render() {
     renderActive();
