@@ -152,13 +152,7 @@ function renderActive() {
   });
 }
 function render() {
-  const hash = window.location.hash || "#/active";
-  const route = hash.replace("#", "");
-  updateNavActive(`#${route}`);
-
-  if (route === "/active") {
     renderActive();
-  }
 }
 formEl.addEventListener("submit", e => {
   e.preventDefault(); // chặn reload form
