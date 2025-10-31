@@ -50,6 +50,24 @@ Trash:
 + restoreTask: Đưa task từ trash vào active.
 ****
 */
+function toggleDone(taskId) {
+  const task = activeTasks.find(t => t.id === taskId);
+  if (task) {
+    task.done = !task.done;
+    saveArray(STORAGE_ACTIVE, activeTasks); 
+    render();
+  }
+}
+function softDelete(taskId) {
+  const taskIndex = activeTasks.findIndex(t => t.id === taskId);
+  if (taskIndex !== -1) {
+    const [task] = activeTasks.splice(taskIndex, 1);
+    trashTasks.push(task);
+    saveArray(STORAGE_ACTIVE, activeTasks);
+    saveArray(STORAGE_TRASH, trashTasks);
+    render();
+  }
+}
 
 // ====== VIEW / RENDER ======
 
@@ -57,6 +75,9 @@ const listTitleEl = document.getElementById("list-title");
 const taskListEl = document.getElementById("task-list");
 const emptyStateEl = document.getElementById("empty-state");
 const addFormSection = document.getElementById("add-form-section");
+const formEl = document.getElementById("task-form");
+const inputTitle = document.getElementById("task-title");
+const inputDeadline = document.getElementById("task-deadline");
 
 // nav links highlight
 function updateNavActive(route) {
@@ -76,12 +97,27 @@ function formatDeadline(dlStr) {
   const yyyy = d.getFullYear();
   const hh = String(d.getHours()).padStart(2, "0");
   const mi = String(d.getMinutes()).padStart(2, "0");
+
   return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
 }
 
 // **** Build single <li> cho 2 route trash và active ****
-
-// **** Xây dựng hàm Render, các hàm liên quan đến ROUTER - Xử lí EVENT ****
-
+function renderActive() {
+}
+function render() {
+    renderActive();
+}
+formEl.addEventListener("submit", e => {
+  e.preventDefault(); // chặn reload form
+  const title = inputTitle.value.trim();
+  const deadline = inputDeadline.value;
+  if (!title) {
+    alert("Please enter task title!");
+    return;
+  }
+  addTask(title, deadline);
+  inputTitle.value = "";
+  inputDeadline.value = "";
+});
 // ====== INITIAL RENDER ======
 render();
