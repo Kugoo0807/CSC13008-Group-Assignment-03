@@ -61,6 +61,22 @@ function softDelete(taskId) {
   }
 }
 
+function hardDelete(taskId) {
+  const idx = trashTasks.findIndex(t => t.id === taskId);
+  if (idx !== -1) return;
+  trashTasks.splice(idx, 1);
+  saveArray(STORAGE_TRASH, trashTasks);
+  render();
+}
+function restoreTask(taskId) {
+  const idx = trashTasks.findIndex(t => t.id === taskId);
+  if (idx === -1) return;
+  const [task] = trashTasks.splice(idx, 1);
+  activeTasks.push(task);
+  saveArray(STORAGE_TRASH, trashTasks);
+  saveArray(STORAGE_ACTIVE, activeTasks);
+  render();
+}
 // ====== VIEW / RENDER ======
 
 const listTitleEl = document.getElementById("list-title");
@@ -181,9 +197,83 @@ function renderActive() {
   });
 }
 // ====== RENDER TRASH ======
+function buildTrashItem(task) {
+  const li = document.createElement("li");
+  li.dataset.id = task.id;
 
+  const now = Date.now();
+  const isOverdue = task.deadline && !task.done && new Date(task.deadline).getTime() < now;
+
+  li.innerHTML = `
+    <div
+      class="
+        flex items-center justify-between
+        p-3 mb-5 rounded-xl shadow-md border-2
+        bg-gradient-to-br from-slate-50/80 to-white/80
+        ${task.done ? 'text-slate-500' : 'text-slate-900'}
+        ring-slate-200 border-slate-200
+      "
+    >
+      <div class="flex flex-col ${task.done ? 'line-through' : ''}">
+        <span class="task-title block">🗑️ ${task.title}</span>
+        <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
+      </div>
+
+      <div class="flex gap-3 items-center">
+        <button
+          class="
+            btn-restore text-sm md:text-base px-2 py-1 rounded
+            bg-emerald-500 text-white ring-1 ring-inset ring-emerald-300
+            shadow md:hover:bg-emerald-600 md:hover:shadow-md transition-all duration-200
+          "
+          title="Restore this task to Active"
+        >
+          Restore
+        </button>
+
+        <button
+          class="
+            btn-harddelete text-sm md:text-base px-2 py-1 rounded
+            ${isOverdue ? 'bg-rose-700' : 'bg-rose-600'}
+            text-white ring-1 ring-inset ring-rose-300
+            shadow md:hover:bg-rose-700 md:hover:shadow-md transition-all duration-200
+          "
+          title="Delete this task permanently"
+        >
+          Delete forever
+        </button>
+      </div>
+    </div>
+  `;
+
+  // events
+  li.querySelector(".btn-restore").addEventListener("click", () => {
+    restoreTask(task.id);
+  });
+  li.querySelector(".btn-harddelete").addEventListener("click", () => {
+    if (confirm("Delete permanently? This cannot be undone.")) {
+      hardDelete(task.id);
+    }
+  });
+
+  return li;
+}
 function renderTrash() {
+  listTitleEl.textContent = "Trash";
+  addFormSection.style.display = "none";   // không thêm task ở Trash
+  taskListEl.innerHTML = "";
 
+  if (!trashTasks.length) {
+    emptyStateEl.style.display = "block";
+    emptyStateEl.textContent = "Trash is empty.";
+    return;
+  }
+  emptyStateEl.style.display = "none";
+
+  // newest first
+  [...trashTasks]
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .forEach(task => taskListEl.appendChild(buildTrashItem(task)));
 }
 
 // ====== RENDER (ROUTER & FORM SUBMIT) ======
