@@ -114,17 +114,53 @@ function renderActive() {
     const isOverdue = task.deadline && !task.done && new Date(task.deadline).getTime() < now;
 
     li.innerHTML = `
-      <div class="flex justify-between items-center p-3 rounded-xl shadow-md border-2 transition-colors duration-300 hover:shadow-lg
-        ${task.done ? "text-gray-400 bg-green-100" : isOverdue ? "bg-red-400 text-white" : "bg-white text-black"}">
+      <div 
+        class="
+          flex items-center justify-between
+          p-3 mb-5 
+          rounded-xl shadow-md border-2 
+          transition-colors duration-300 md:hover:shadow-xl
+          ${task.done
+            ? "bg-gradient-to-br from-emerald-50/70 to-emerald-100/50 text-slate-500 ring-emerald-200 border-emerald-300"
+            : isOverdue
+              ? "bg-gradient-to-br from-rose-500/90 to-rose-600/80 text-white ring-rose-300/60 border-rose-400"
+              : "bg-gradient-to-br from-white/80 to-slate-50/70 text-slate-900 ring-slate-200 border-slate-200"}"
+      >
+        
         <div class="flex flex-col ${task.done ? 'line-through' : ''}">
           <span class="task-title block">${task.title}</span>
           <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
         </div>
-        <div class="flex gap-2 items-center">
-          <button class="btn-toggle text-xl px-2 py-1 rounded ${isOverdue ? "bg-red-600 text-white font-semibold" : task.done ? "bg-green-500 text-white" : "bg-gray-400 text-black"}">
-            ${isOverdue ? "Overdue" : task.done ? "Checked" : "Pending"}</button>
-          <button class="btn-delete text-xl">🗑️</button>
-        </div>
+        
+        <div class="flex gap-4 md:gap-5 items-center">
+          <button 
+            class="
+              btn-toggle text-sm md:text-base px-2 py-1 rounded
+              shadow md:hover:shadow-md
+              ring-1 ring-inset transition-all duration-200
+              ${isOverdue
+                ? "bg-rose-700 text-white font-semibold ring-rose-300 md:hover:bg-rose-600"
+                : task.done
+                  ? "bg-emerald-500 text-white ring-emerald-300 md:hover:bg-emerald-600"
+                  : "bg-slate-200 text-slate-900 ring-slate-300 md:hover:bg-slate-300"}
+            "
+          >
+            ${isOverdue ? "Overdue" : task.done ? "Checked" : "Pending"}
+          </button>
+          
+          <button 
+            class="
+              btn-delete text-sm md:text-base
+              px-2 py-1 rounded
+              bg-white/10 backdrop-blur-md md:hover:bg-white/50
+              ring-1 ring-inset ring-slate-300/70
+              shadow md:hover:shadow-md
+            "
+          >
+            🗑️
+          </button>
+        
+          </div>
       </div>
     `;
     taskListEl.appendChild(li);
