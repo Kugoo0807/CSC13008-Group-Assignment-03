@@ -96,9 +96,54 @@ function formatDeadline(dlStr) {
 // ====== RENDER ACTIVE ======
 
 function renderActive() {
+  listTitleEl.textContent = "Active Tasks";
+  addFormSection.style.display = "block";
+  taskListEl.innerHTML = "";
+  if (activeTasks.length === 0) {
+    emptyStateEl.style.display = "block";
+    return;
+  } else {
+    emptyStateEl.style.display = "none";
+  }
 
+  activeTasks.forEach(task => {
+    const li = document.createElement("li");
+    li.dataset.id = task.id;
+
+    const now = Date.now();
+    const isOverdue = task.deadline && !task.done && new Date(task.deadline).getTime() < now;
+
+    li.innerHTML = `
+      <div class="flex justify-between items-center p-3 rounded-xl shadow-md border-2 transition-colors duration-300 hover:shadow-lg
+        ${task.done ? "text-gray-400 bg-green-100" : isOverdue ? "bg-red-400 text-white" : "bg-white text-black"}">
+        <div class="flex flex-col ${task.done ? 'line-through' : ''}">
+          <span class="task-title block">${task.title}</span>
+          <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
+        </div>
+        <div class="flex gap-2 items-center">
+          <button class="btn-toggle text-xl px-2 py-1 rounded ${isOverdue ? "bg-red-600 text-white font-semibold" : task.done ? "bg-green-500 text-white" : "bg-gray-400 text-black"}">
+            ${isOverdue ? "Overdue" : task.done ? "Checked" : "Pending"}</button>
+          <button class="btn-delete text-xl">🗑️</button>
+        </div>
+      </div>
+    `;
+    taskListEl.appendChild(li);
+  });
+
+  // attach event listeners to buttons
+  taskListEl.querySelectorAll(".btn-toggle").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const id = e.target.closest("li").dataset.id;
+      toggleDone(id);
+    });
+  });
+  taskListEl.querySelectorAll(".btn-delete").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const id = e.target.closest("li").dataset.id;
+      softDelete(id);
+    });
+  });
 }
-
 // ====== RENDER TRASH ======
 
 function renderTrash() {
