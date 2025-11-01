@@ -63,11 +63,12 @@ function softDelete(taskId) {
 
 function hardDelete(taskId) {
   const idx = trashTasks.findIndex(t => t.id === taskId);
-  if (idx !== -1) return;
+  if (idx === -1) return;
   trashTasks.splice(idx, 1);
   saveArray(STORAGE_TRASH, trashTasks);
   render();
 }
+
 function restoreTask(taskId) {
   const idx = trashTasks.findIndex(t => t.id === taskId);
   if (idx === -1) return;
@@ -77,6 +78,7 @@ function restoreTask(taskId) {
   saveArray(STORAGE_ACTIVE, activeTasks);
   render();
 }
+
 // ====== VIEW / RENDER ======
 
 const listTitleEl = document.getElementById("list-title");
@@ -122,7 +124,13 @@ function renderActive() {
     emptyStateEl.style.display = "none";
   }
 
-  activeTasks.forEach(task => {
+  const sortedActive = [...activeTasks].sort((a, b) => {
+    const aTime = a.deadline ? Date.parse(a.deadline) : Infinity;
+    const bTime = b.deadline ? Date.parse(b.deadline) : Infinity;
+    return aTime - bTime;
+  });
+
+  sortedActive.forEach(task => {
     const li = document.createElement("li");
     li.dataset.id = task.id;
 
@@ -135,15 +143,15 @@ function renderActive() {
           flex items-center justify-between
           p-3 mb-5 
           rounded-xl shadow-md border-2 
-          transition-colors duration-300 md:hover:shadow-xl
+          transition-all duration-300 ease-out hover:-translate-y-[2px] hover:shadow-lg
           ${task.done
             ? "bg-gradient-to-br from-emerald-50/70 to-emerald-100/50 text-slate-500 ring-emerald-200 border-emerald-300"
             : isOverdue
               ? "bg-gradient-to-br from-rose-500/90 to-rose-600/80 text-white ring-rose-300/60 border-rose-400"
-              : "bg-gradient-to-br from-white/80 to-slate-50/70 text-slate-900 ring-slate-200 border-slate-200"}"
+              : "bg-gradient-to-br from-white/60 to-slate-50/70 text-slate-900 ring-slate-200 border-slate-200"}"
       >
         
-        <div class="flex flex-col ${task.done ? 'line-through' : ''}">
+        <div class="flex flex-col ${task.done ? 'line-through text-gray-400' : ''}">
           <span class="task-title block">${task.title}</span>
           <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
         </div>
@@ -168,7 +176,7 @@ function renderActive() {
             class="
               btn-delete text-sm md:text-base
               px-2 py-1 rounded
-              bg-white/10 backdrop-blur-md md:hover:bg-white/50
+              bg-white/10 backdrop-blur-md md:hover:bg-white/60
               ring-1 ring-inset ring-slate-300/70
               shadow md:hover:shadow-md
             "
@@ -196,7 +204,9 @@ function renderActive() {
     });
   });
 }
+
 // ====== RENDER TRASH ======
+
 function buildTrashItem(task) {
   const li = document.createElement("li");
   li.dataset.id = task.id;
@@ -210,11 +220,11 @@ function buildTrashItem(task) {
         flex items-center justify-between
         p-3 mb-5 rounded-xl shadow-md border-2
         bg-gradient-to-br from-slate-50/80 to-white/80
-        ${task.done ? 'text-slate-500' : 'text-slate-900'}
         ring-slate-200 border-slate-200
+        transition-all duration-300 ease-out hover:-translate-y-[2px] hover:shadow-lg
       "
     >
-      <div class="flex flex-col ${task.done ? 'line-through' : ''}">
+      <div class="flex flex-col ${task.done ? 'line-through text-gray-400' : isOverdue ? 'text-rose-700' : 'text-black'}">
         <span class="task-title block">🗑️ ${task.title}</span>
         <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
       </div>
@@ -224,6 +234,7 @@ function buildTrashItem(task) {
           class="
             btn-restore text-sm md:text-base px-2 py-1 rounded
             bg-emerald-500 text-white ring-1 ring-inset ring-emerald-300
+            border-2 border-emerald-800
             shadow md:hover:bg-emerald-600 md:hover:shadow-md transition-all duration-200
           "
           title="Restore this task to Active"
@@ -234,7 +245,8 @@ function buildTrashItem(task) {
         <button
           class="
             btn-harddelete text-sm md:text-base px-2 py-1 rounded
-            ${isOverdue ? 'bg-rose-700' : 'bg-rose-600'}
+            bg-rose-600
+            border-2 border-rose-900
             text-white ring-1 ring-inset ring-rose-300
             shadow md:hover:bg-rose-700 md:hover:shadow-md transition-all duration-200
           "
@@ -258,6 +270,7 @@ function buildTrashItem(task) {
 
   return li;
 }
+
 function renderTrash() {
   listTitleEl.textContent = "Trash";
   addFormSection.style.display = "none";   // không thêm task ở Trash
@@ -272,7 +285,11 @@ function renderTrash() {
 
   // newest first
   [...trashTasks]
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort((a, b) => {
+      const aTime = a.deadline ? Date.parse(a.deadline) : Infinity;
+      const bTime = b.deadline ? Date.parse(b.deadline) : Infinity;
+      return aTime - bTime;
+    })
     .forEach(task => taskListEl.appendChild(buildTrashItem(task)));
 }
 
