@@ -15,6 +15,7 @@
         extend: {
           colors: {
             brand: {
+              50: '#f0f4ff',
               500: '#4f46e5',
               600: '#4338ca',
             }
@@ -27,22 +28,34 @@
   <!-- PNG favicon -->
   <link rel="icon" type="image/png" href="img/logo_web.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="img/logo_web.png" sizes="192x192" />
+
+  <style>
+    /* Ensure the active tab is highlighted */
+    .nav-link[data-active="true"] {
+      border-bottom: 2px solid #4f46e5; 
+      color: #4f46e5;
+    }
+
+    .nav-link:hover {
+      border-bottom: 2px solid #4f46e5; 
+      color: #4f46e5;
+    }
+  </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col">
 
   <!-- HEADER / NAV -->
   <header class="bg-white shadow sticky top-0 z-10">
-    <div>
-      <h1">
-        TODO Manager
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+      <h1 class="text-xl font-bold text-gray-900">
+        TODO App
       </h1>
 
-      <!-- nav buttons  -->
-      <nav>
-        <a href="#/active">
+      <nav class="flex space-x-4 h-full items-stretch">
+        <a href="#/active" class="nav-link text-gray-500 hover:text-brand-500 transition duration-150 ease-in-out flex items-center px-1" data-active="true">
           Tasks
         </a>
-        <a href="#/trash">
+        <a href="#/trash" class="nav-link text-gray-500 hover:text-brand-500 transition duration-150 ease-in-out flex items-center px-1" data-active="false">
           Trash
         </a>
       </nav>
@@ -50,32 +63,34 @@
   </header>
 
   <!-- MAIN -->
-  <main class="flex-1 w-full max-w-2xl mx-auto p-4">
+  <main class="flex-1 w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
 
     <!-- FORM ADD TASK -->
-    <section id="add-form-section">
-      <h2>Add new task</h2>
-      <form id="task-form">
+    <section id="add-form-section" class="mb-8 p-6 bg-white rounded-xl shadow-lg">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add new task</h2>
+      <form id="task-form" class="space-y-4">
         <div>
-          <label>Task content</label>
+          <label for="task-title" class="block text-sm font-medium text-gray-700 mb-1">Task content</label>
           <input
             id="task-title"
             type="text"
             required
-            placeholder="E.g. Learning web..."
+            placeholder="Enter task here"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
           />
         </div>
 
         <div>
-          <label>Deadline</label>
+          <label for="task-deadline" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
           <input
             id="task-deadline"
             type="datetime-local"
             required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
           />
         </div>
 
-        <button type="submit">
+        <button type="submit" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-brand-500 hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition duration-150 ease-in-out">
           <span>+ Add</span>
         </button>
       </form>
@@ -83,30 +98,24 @@
 
     <!-- LIST ACTIVE / TRASH -->
     <section>
-      <!-- Title dynamic -->
-      <div>
-        <h2 id="list-title">
+      <div class="flex items-end justify-between mb-4">
+        <h2 id="list-title" class="text-2xl font-semibold text-gray-800">
           Task list
         </h2>
-
-        <!-- hint -->
-        <p>
-          Click on the square to Mark/Unmark.
-        </p>
       </div>
 
       <!-- TASK LIST RENDER HERE -->
-      <ul id="task-list"></ul>
+      <ul id="task-list" class="space-y-3"></ul>
 
       <!-- empty state -->
-      <div id="empty-state">
+      <div id="empty-state" class="text-center p-10 bg-white rounded-xl shadow-inner text-slate-500 font-medium">
         Nothing to show
       </div>
     </section>
   </main>
 
   <!-- FOOTER -->
-  <footer class="text-center text-[11px] text-slate-400 py-6">
+  <footer class="text-center text-[11px] text-slate-400 py-6 border-t mt-4">
     © 2025 HCMUS | GA03 - TODO App
   </footer>
 
