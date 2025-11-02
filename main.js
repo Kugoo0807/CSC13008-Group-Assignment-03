@@ -297,6 +297,9 @@ function renderTrash() {
 
 function render() {
   const route = location.hash || "#/active";
+  // hover effect for navigation links
+  updateNavActive(route);
+
   if (route === "#/trash") renderTrash();
   else renderActive();
 }
