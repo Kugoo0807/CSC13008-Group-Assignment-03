@@ -81,13 +81,14 @@ function restoreTask(taskId) {
 
 // ====== VIEW / RENDER ======
 
-const listTitleEl = document.getElementById("list-title");
-const taskListEl = document.getElementById("task-list");
-const emptyStateEl = document.getElementById("empty-state");
-const addFormSection = document.getElementById("add-form-section");
-const formEl = document.getElementById("task-form");
-const inputTitle = document.getElementById("task-title");
-const inputDeadline = document.getElementById("task-deadline");
+const listTitleEl     = document.getElementById("list-title");
+const taskGuideEl     = document.getElementById("task-guide");
+const taskListEl      = document.getElementById("task-list");
+const emptyStateEl    = document.getElementById("empty-state");
+const addFormSection  = document.getElementById("add-form-section");
+const formEl          = document.getElementById("task-form");
+const inputTitle      = document.getElementById("task-title");
+const inputDeadline   = document.getElementById("task-deadline");
 
 // nav links highlight
 function updateNavActive(route) {
@@ -115,6 +116,8 @@ function formatDeadline(dlStr) {
 
 function renderActive() {
   listTitleEl.textContent = "Active Tasks";
+  taskGuideEl.style.display = "block";
+  taskGuideEl.textContent = "Click status to change • Click 🗑️ to delete task";
   addFormSection.style.display = "block";
   taskListEl.innerHTML = "";
   if (activeTasks.length === 0) {
@@ -273,6 +276,7 @@ function buildTrashItem(task) {
 
 function renderTrash() {
   listTitleEl.textContent = "Trash";
+  taskGuideEl.style.display = "none";
   addFormSection.style.display = "none";   // không thêm task ở Trash
   taskListEl.innerHTML = "";
 
