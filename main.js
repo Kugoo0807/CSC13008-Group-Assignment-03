@@ -61,15 +61,34 @@ function softDelete(taskId) {
   }
 }
 
+function hardDelete(taskId) {
+  const idx = trashTasks.findIndex(t => t.id === taskId);
+  if (idx === -1) return;
+  trashTasks.splice(idx, 1);
+  saveArray(STORAGE_TRASH, trashTasks);
+  render();
+}
+
+function restoreTask(taskId) {
+  const idx = trashTasks.findIndex(t => t.id === taskId);
+  if (idx === -1) return;
+  const [task] = trashTasks.splice(idx, 1);
+  activeTasks.push(task);
+  saveArray(STORAGE_TRASH, trashTasks);
+  saveArray(STORAGE_ACTIVE, activeTasks);
+  render();
+}
+
 // ====== VIEW / RENDER ======
 
-const listTitleEl = document.getElementById("list-title");
-const taskListEl = document.getElementById("task-list");
-const emptyStateEl = document.getElementById("empty-state");
-const addFormSection = document.getElementById("add-form-section");
-const formEl = document.getElementById("task-form");
-const inputTitle = document.getElementById("task-title");
-const inputDeadline = document.getElementById("task-deadline");
+const listTitleEl     = document.getElementById("list-title");
+const taskGuideEl     = document.getElementById("task-guide");
+const taskListEl      = document.getElementById("task-list");
+const emptyStateEl    = document.getElementById("empty-state");
+const addFormSection  = document.getElementById("add-form-section");
+const formEl          = document.getElementById("task-form");
+const inputTitle      = document.getElementById("task-title");
+const inputDeadline   = document.getElementById("task-deadline");
 
 // nav links highlight
 function updateNavActive(route) {
@@ -97,6 +116,8 @@ function formatDeadline(dlStr) {
 
 function renderActive() {
   listTitleEl.textContent = "Active Tasks";
+  taskGuideEl.style.display = "block";
+  taskGuideEl.textContent = "Click status to change • Click 🗑️ to delete task";
   addFormSection.style.display = "block";
   taskListEl.innerHTML = "";
   if (activeTasks.length === 0) {
@@ -106,7 +127,13 @@ function renderActive() {
     emptyStateEl.style.display = "none";
   }
 
-  activeTasks.forEach(task => {
+  const sortedActive = [...activeTasks].sort((a, b) => {
+    const aTime = a.deadline ? Date.parse(a.deadline) : Infinity;
+    const bTime = b.deadline ? Date.parse(b.deadline) : Infinity;
+    return aTime - bTime;
+  });
+
+  sortedActive.forEach(task => {
     const li = document.createElement("li");
     li.dataset.id = task.id;
 
@@ -114,17 +141,53 @@ function renderActive() {
     const isOverdue = task.deadline && !task.done && new Date(task.deadline).getTime() < now;
 
     li.innerHTML = `
-      <div class="flex justify-between items-center p-3 rounded-xl shadow-md border-2 transition-colors duration-300 hover:shadow-lg
-        ${task.done ? "text-gray-400 bg-green-100" : isOverdue ? "bg-red-400 text-white" : "bg-white text-black"}">
-        <div class="flex flex-col ${task.done ? 'line-through' : ''}">
+      <div 
+        class="
+          flex items-center justify-between
+          p-3 mb-5 
+          rounded-xl shadow-md border-2 
+          transition-all duration-300 ease-out hover:-translate-y-[2px] hover:shadow-lg
+          ${task.done
+            ? "bg-gradient-to-br from-emerald-50/70 to-emerald-100/50 text-slate-500 ring-emerald-200 border-emerald-300"
+            : isOverdue
+              ? "bg-gradient-to-br from-rose-500/90 to-rose-600/80 text-white ring-rose-300/60 border-rose-400"
+              : "bg-gradient-to-br from-white/60 to-slate-50/70 text-slate-900 ring-slate-200 border-slate-200"}"
+      >
+        
+        <div class="flex flex-col ${task.done ? 'line-through text-gray-400' : ''}">
           <span class="task-title block">${task.title}</span>
           <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
         </div>
-        <div class="flex gap-2 items-center">
-          <button class="btn-toggle text-xl px-2 py-1 rounded ${isOverdue ? "bg-red-600 text-white font-semibold" : task.done ? "bg-green-500 text-white" : "bg-gray-400 text-black"}">
-            ${isOverdue ? "Overdue" : task.done ? "Checked" : "Pending"}</button>
-          <button class="btn-delete text-xl">🗑️</button>
-        </div>
+        
+        <div class="flex gap-4 md:gap-5 items-center">
+          <button 
+            class="
+              btn-toggle text-sm md:text-base px-2 py-1 rounded
+              shadow md:hover:shadow-md
+              ring-1 ring-inset transition-all duration-200
+              ${isOverdue
+                ? "bg-rose-700 text-white font-semibold ring-rose-300 md:hover:bg-rose-600"
+                : task.done
+                  ? "bg-emerald-500 text-white ring-emerald-300 md:hover:bg-emerald-600"
+                  : "bg-slate-200 text-slate-900 ring-slate-300 md:hover:bg-slate-300"}
+            "
+          >
+            ${isOverdue ? "Overdue" : task.done ? "Checked" : "Pending"}
+          </button>
+          
+          <button 
+            class="
+              btn-delete text-sm md:text-base
+              px-2 py-1 rounded
+              bg-white/10 backdrop-blur-md md:hover:bg-white/60
+              ring-1 ring-inset ring-slate-300/70
+              shadow md:hover:shadow-md
+            "
+          >
+            🗑️
+          </button>
+        
+          </div>
       </div>
     `;
     taskListEl.appendChild(li);
@@ -144,16 +207,103 @@ function renderActive() {
     });
   });
 }
+
 // ====== RENDER TRASH ======
 
-function renderTrash() {
+function buildTrashItem(task) {
+  const li = document.createElement("li");
+  li.dataset.id = task.id;
 
+  const now = Date.now();
+  const isOverdue = task.deadline && !task.done && new Date(task.deadline).getTime() < now;
+
+  li.innerHTML = `
+    <div
+      class="
+        flex items-center justify-between
+        p-3 mb-5 rounded-xl shadow-md border-2
+        bg-gradient-to-br from-slate-50/80 to-white/80
+        ring-slate-200 border-slate-200
+        transition-all duration-300 ease-out hover:-translate-y-[2px] hover:shadow-lg
+      "
+    >
+      <div class="flex flex-col ${task.done ? 'line-through text-gray-400' : isOverdue ? 'text-rose-700' : 'text-black'}">
+        <span class="task-title block">🗑️ ${task.title}</span>
+        <span class="task-deadline text-sm">${formatDeadline(task.deadline)}</span>
+      </div>
+
+      <div class="flex gap-3 items-center">
+        <button
+          class="
+            btn-restore text-sm md:text-base px-2 py-1 rounded
+            bg-emerald-500 text-white ring-1 ring-inset ring-emerald-300
+            border-2 border-emerald-800
+            shadow md:hover:bg-emerald-600 md:hover:shadow-md transition-all duration-200
+          "
+          title="Restore this task to Active"
+        >
+          Restore
+        </button>
+
+        <button
+          class="
+            btn-harddelete text-sm md:text-base px-2 py-1 rounded
+            bg-rose-600
+            border-2 border-rose-900
+            text-white ring-1 ring-inset ring-rose-300
+            shadow md:hover:bg-rose-700 md:hover:shadow-md transition-all duration-200
+          "
+          title="Delete this task permanently"
+        >
+          Delete forever
+        </button>
+      </div>
+    </div>
+  `;
+
+  // events
+  li.querySelector(".btn-restore").addEventListener("click", () => {
+    restoreTask(task.id);
+  });
+  li.querySelector(".btn-harddelete").addEventListener("click", () => {
+    if (confirm("Delete permanently? This cannot be undone.")) {
+      hardDelete(task.id);
+    }
+  });
+
+  return li;
+}
+
+function renderTrash() {
+  listTitleEl.textContent = "Trash";
+  taskGuideEl.style.display = "none";
+  addFormSection.style.display = "none";   // không thêm task ở Trash
+  taskListEl.innerHTML = "";
+
+  if (!trashTasks.length) {
+    emptyStateEl.style.display = "block";
+    emptyStateEl.textContent = "Trash is empty.";
+    return;
+  }
+  emptyStateEl.style.display = "none";
+
+  // newest first
+  [...trashTasks]
+    .sort((a, b) => {
+      const aTime = a.deadline ? Date.parse(a.deadline) : Infinity;
+      const bTime = b.deadline ? Date.parse(b.deadline) : Infinity;
+      return aTime - bTime;
+    })
+    .forEach(task => taskListEl.appendChild(buildTrashItem(task)));
 }
 
 // ====== RENDER (ROUTER & FORM SUBMIT) ======
 
 function render() {
   const route = location.hash || "#/active";
+  // hover effect for navigation links
+  updateNavActive(route);
+
   if (route === "#/trash") renderTrash();
   else renderActive();
 }
