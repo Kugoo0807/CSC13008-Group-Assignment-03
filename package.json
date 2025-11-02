@@ -1,0 +1,23 @@
+{
+  "name": "csc13008-group-assignment-03",
+  "version": "1.0.0",
+  "description": "**Chuyên ngành: Kỹ Thuật Phần Mềm**",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kugoo0807/CSC13008-Group-Assignment-03.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kugoo0807/CSC13008-Group-Assignment-03/issues"
+  },
+  "homepage": "https://github.com/Kugoo0807/CSC13008-Group-Assignment-03#readme",
+  "devDependencies": {
+    "tailwindcss": "^4.1.16"
+  }
+}
